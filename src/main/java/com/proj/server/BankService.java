@@ -16,9 +16,6 @@ public class BankService extends BankServiceGrpc.BankServiceImplBase {
                 .build();
 
         responseObserver.onNext(balance);
-        responseObserver.onNext(balance);
-        responseObserver.onNext(balance);
-
         responseObserver.onCompleted();
     }
 
@@ -43,5 +40,10 @@ public class BankService extends BankServiceGrpc.BankServiceImplBase {
         }
 
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public StreamObserver<DepositRequest> cashDeposit(StreamObserver<Balance> responseObserver) {
+        return new CashStreamingRequest(responseObserver);
     }
 }
