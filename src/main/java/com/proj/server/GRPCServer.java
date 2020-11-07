@@ -10,6 +10,7 @@ public class GRPCServer {
 
         Server server = ServerBuilder.forPort(6565)
                 .addService(new BankService())
+                .addService(new TransferService())
                 .build();
 
         server.start();
