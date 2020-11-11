@@ -1,4 +1,4 @@
-package com.proj.server;
+package com.proj.server.rpctypes;
 
 import com.proj.models.Die;
 import com.proj.models.GameServiceGrpc;

@@ -1,4 +1,4 @@
-package com.proj.server;
+package com.proj.server.rpctypes;
 
 import com.proj.models.Account;
 import com.proj.models.TransferRequest;

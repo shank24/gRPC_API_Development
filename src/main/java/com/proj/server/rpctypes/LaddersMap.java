@@ -1,4 +1,4 @@
-package com.proj.server;
+package com.proj.server.rpctypes;
 
 import java.util.HashMap;
 import java.util.Map;

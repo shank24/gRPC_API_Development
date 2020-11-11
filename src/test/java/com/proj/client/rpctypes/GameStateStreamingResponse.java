@@ -1,4 +1,4 @@
-package com.proj.client;
+package com.proj.client.rpctypes;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.proj.models.Die;

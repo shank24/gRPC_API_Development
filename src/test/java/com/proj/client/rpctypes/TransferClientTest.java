@@ -1,9 +1,7 @@
-package com.proj.client;
+package com.proj.client.rpctypes;
 
-import com.proj.models.BankServiceGrpc;
 import com.proj.models.TransferRequest;
 import com.proj.models.TransferServiceGrpc;
-import com.proj.server.TransferService;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;

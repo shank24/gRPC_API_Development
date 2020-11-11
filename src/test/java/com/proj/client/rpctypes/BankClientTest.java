@@ -1,6 +1,5 @@
-package com.proj.client;
+package com.proj.client.rpctypes;
 
-import com.google.common.util.concurrent.Uninterruptibles;
 import com.proj.models.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -24,12 +23,16 @@ public class BankClientTest {
                 .usePlaintext()
                 .build();
 
+
+
        this.blockingStub  = BankServiceGrpc.newBlockingStub(managedChannel);
        this.bankServiceStub = BankServiceGrpc.newStub(managedChannel);
+
     }
 
     @Test
-    public void balanceTest(){
+    public void balanceTest() throws InterruptedException {
+
 
         BalanceCheckRequest balanceCheckRequest = BalanceCheckRequest.newBuilder()
                 .setAccountNumber(2)
