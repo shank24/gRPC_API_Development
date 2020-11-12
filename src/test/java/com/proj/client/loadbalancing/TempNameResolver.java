@@ -1,8 +1,17 @@
 package com.proj.client.loadbalancing;
 
+import io.grpc.EquivalentAddressGroup;
 import io.grpc.NameResolver;
 
+import java.util.List;
+
 public class TempNameResolver extends NameResolver {
+
+    private final String service;
+
+    public TempNameResolver(String service) {
+        this.service = service;
+    }
 
     @Override
     public String getServiceAuthority() {
@@ -15,9 +24,16 @@ public class TempNameResolver extends NameResolver {
     }
 
     @Override
+    public void refresh() {
+        super.refresh();
+    }
+
+    @Override
     public void start(Listener2 listener) {
 
-        listener.onResult();
-        super.start(listener);
+        List<EquivalentAddressGroup> addressGroups = ServiceRegistry.getInstance(this.service);
+        ResolutionResult resolutionResult = ResolutionResult.newBuilder().setAddresses(addressGroups).build();
+
+        listener.onResult(resolutionResult);
     }
 }
