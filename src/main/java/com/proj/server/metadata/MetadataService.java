@@ -1,30 +1,37 @@
-package com.proj.server.deadline;
+package com.proj.server.metadata;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.proj.models.*;
 import com.proj.server.rpctypes.AccountDatabase;
 import com.proj.server.rpctypes.CashStreamingRequest;
 import io.grpc.Context;
+import io.grpc.Metadata;
 import io.grpc.Status;
+import io.grpc.protobuf.ProtoUtils;
 import io.grpc.stub.StreamObserver;
 
 import java.util.concurrent.TimeUnit;
 
-public class DeadlineService extends BankServiceGrpc.BankServiceImplBase {
+public class MetadataService extends BankServiceGrpc.BankServiceImplBase {
 
     @Override
     public void getBalance(BalanceCheckRequest request, StreamObserver<Balance> responseObserver) {
 
         int accountNumber = request.getAccountNumber();
+        int amount = AccountDatabase.getBalance(accountNumber);
+
+        UserRole userRole = ServerConstants.CTX_USER_ROLE.get();
+        UserRole userRole1 = ServerConstants.CTX_USER_ROLE1.get();
+
+        amount = UserRole.PRIME.equals(userRole) ? amount: (amount-15);
 
         System.out.println(
-                "Received the request for : "+ accountNumber
+                userRole + " : " + userRole1
         );
+
         Balance balance = Balance.newBuilder()
-                .setAmount(AccountDatabase.getBalance(accountNumber))
+                .setAmount(amount)
                 .build();
-        //simulate time consuming calls
-        Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
         responseObserver.onNext(balance);
         responseObserver.onCompleted();
     }
@@ -36,28 +43,32 @@ public class DeadlineService extends BankServiceGrpc.BankServiceImplBase {
         int amount = request.getAmount();
         int balance = AccountDatabase.getBalance(accountNumber);
 
+        if(amount<10 || (amount%10)!=0){
+
+            Metadata metadata = new Metadata();
+            Metadata.Key<WithdrawalError> errorKey = ProtoUtils.keyForProto(WithdrawalError.getDefaultInstance());
+            WithdrawalError withdrawalError = WithdrawalError.newBuilder().setAmount(balance).setErrorMessage(ErrorMessage.ONLY_TEN_MULTIPLES).build();
+            metadata.put(errorKey,withdrawalError);
+            responseObserver.onError(Status.FAILED_PRECONDITION.asRuntimeException(metadata));
+            return;
+        }
+
         if(balance<amount){
-            Status status = Status.FAILED_PRECONDITION.withDescription("Not Enough Money, You have only " + balance);
-            responseObserver.onError(status.asRuntimeException());
+
+            Metadata metadata = new Metadata();
+            Metadata.Key<WithdrawalError> errorKey = ProtoUtils.keyForProto(WithdrawalError.getDefaultInstance());
+            WithdrawalError withdrawalError = WithdrawalError.newBuilder().setAmount(balance).setErrorMessage(ErrorMessage.INSUFFICIENT_BALANCE).build();
+            metadata.put(errorKey,withdrawalError);
+            responseObserver.onError(Status.FAILED_PRECONDITION.asRuntimeException(metadata));
             return;
         }
 
 
         for (int i = 0; i <amount/10 ; i++) {
-            Money money = Money.newBuilder().setValue(10).build();
-            Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
-
-            // If Server Is listening, then do, else break.
-            if (!Context.current().isCancelled()) {
+                Money money = Money.newBuilder().setValue(10).build();
                 responseObserver.onNext(money);
-                System.out.println("Delivered $10 :: ");
                 AccountDatabase.deductBalance(accountNumber, 10);
-            }else {
-                break;
-            }
         }
-        System.out.println("Completed :: ");
-
         responseObserver.onCompleted();
     }
 

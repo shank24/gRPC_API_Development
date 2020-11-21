@@ -24,6 +24,7 @@ public class DeadlineClientTest {
     public void setUp(){
 
         ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("localhost", 6565)
+                .intercept(new DeadlineInterceptor())
                 .usePlaintext()
                 .build();
        this.blockingStub  = BankServiceGrpc.newBlockingStub(managedChannel);
@@ -39,7 +40,6 @@ public class DeadlineClientTest {
 
         try{
             Balance balance = this.blockingStub
-                    .withDeadline(Deadline.after(2, TimeUnit.SECONDS))
                     .getBalance(balanceCheckRequest);
 
             System.out.println(
@@ -58,10 +58,8 @@ public class DeadlineClientTest {
                 .setAmount(50)
                 .build();
         try {
-
-
             this.blockingStub
-                    .withDeadline(Deadline.after(4, TimeUnit.SECONDS))
+                    .withDeadline(Deadline.after(2,TimeUnit.SECONDS))
                     .withdraw(withdrawRequest)
                     .forEachRemaining(money -> System.out.println("Received " + money.getValue()));
         }

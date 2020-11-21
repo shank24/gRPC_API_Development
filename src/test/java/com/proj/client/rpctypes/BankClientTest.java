@@ -64,7 +64,7 @@ public class BankClientTest {
 
         WithdrawRequest withdrawRequest = WithdrawRequest.newBuilder()
                 .setAccountNumber(10)
-                .setAmount(40)
+                .setAmount(60)
                 .build();
 
         this.bankServiceStub.withdraw(withdrawRequest,new MoneyStreamingResponse(latch));
